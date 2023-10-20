@@ -1,6 +1,6 @@
 # Ghost + Nginx blog
 
-A simple blog platform, batteries included, running in Docker containers with [Ghost](https://ghost.org/) as the blogging platform, [Nginx](https://nginx.org/en/docs/j) reverse proxy, and [PostgreSQL](https://www.postgresql.org/) as the backend database.
+A simple blog platform, batteries included, running in Docker containers with [Ghost](https://ghost.org/) as the blogging platform, [Nginx](https://nginx.org/en/docs/j) reverse proxy, and MySQL 8 as the database backend.
 
 ## Prerequisites
 
@@ -36,7 +36,6 @@ If you want to serve this to the public web, you'll need to open the port on you
 - Ghost - https://ghost.org/
 - Docker - https://docker.com/
 - Nginx - https://nginx.org/en/docs/
-- PostgreSQL - https://www.postgresql.org/
 
 **Installation guides:**
 
@@ -46,6 +45,10 @@ If you want to serve this to the public web, you'll need to open the port on you
 **Server configuration**
 
 - Opening port 80 on Linux - https://www.cyberciti.biz/faq/linux-iptables-firewall-open-port-80/
+
+**Nginx configuration**
+
+- _TODO_
 
 ## License
 
