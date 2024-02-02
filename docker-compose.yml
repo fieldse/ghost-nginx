@@ -9,17 +9,17 @@ services:
       - 8080:2368
     environment:
       # see https://ghost.org/docs/config/#configuration-options
-      database__client: mysql
-      database__connection__host: db
-      database__connection__user: root
-      database__connection__password: example
-      database__connection__database: ghost
+      database__client: ${DATABASE__CLIENT}
+      database__connection__host: ${DATABASE__CONNECTION__HOST}
+      database__connection__user: ${DATABASE__CONNECTION__USER}
+      database__connection__password: ${DATABASE__CONNECTION__PASSWORD}
+      database__connection__database: ${DATABASE__CONNECTION__DATABASE}
       url: http://localhost:8080
       # contrary to the default mentioned in the linked documentation, this image defaults to NODE_ENV=production (so development mode needs to be explicitly specified if desired)
       #NODE_ENV: development
 
   db:
-    image: mysql:8.0
+    image: mysql:latest
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: example
