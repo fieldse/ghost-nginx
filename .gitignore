@@ -1,0 +1,11 @@
+# Mac stuf
+**/.DS_Store
+
+# VSCode
+*.code-project
+
+# Node
+**/node_modules
+
+# Environment files
+.env
