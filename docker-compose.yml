@@ -26,6 +26,9 @@ services:
     container_name: ghost_db_mysql
     image: mysql:${MYSQL_DOCKER_VERSION:-latest}
     restart: always
+    volumes:
+      - ~/data/db:/var/lib/mysql
+
     ports:
       - ${DB_PORT:-3306}:3306
 
