@@ -3,6 +3,7 @@ version: '3.1'
 services:
 
   ghost:
+    container_name: ghost
     image: ghost:${GHOST_DOCKER_VERSION:-latest}
     restart: always
     ports:
@@ -14,10 +15,21 @@ services:
       database__connection__user: ${DB_USER}
       database__connection__password: ${DB_PASSWORD}
       database__connection__database: ${DB_DATABASE}
-      url: "${PROTOCOL:-http}://${SITE_URL:-localhost}:${PORT:-8080}"
+      url: "${PROTOCOL:-https}://${SITE_URL:-localhost}:${PORT:-8080}"
 
-  db:
+    links:
+      - mysql
+
+
+  mysql:
+    container_name: ghost_db_mysql
     image: mysql:${MYSQL_DOCKER_VERSION:-latest}
     restart: always
+    ports:
+      - ${DB_PORT:-3306}:3306
+
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${DB_DATABASE}"
+      MYSQL_USER: "${DB_USER}"
+      MYSQL_PASSWORD:  "${DB_PASSWORD}"
