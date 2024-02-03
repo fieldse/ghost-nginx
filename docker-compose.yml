@@ -16,6 +16,7 @@ services:
       database__connection__password: ${DB_PASSWORD}
       database__connection__database: ${DB_DATABASE}
       url: "${PROTOCOL:-https}://${SITE_URL:-localhost}:${PORT:-8080}"
+      NODE_ENV: ${NODE_ENV:-development} # change me for production
 
     links:
       - mysql
