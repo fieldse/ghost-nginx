@@ -3,7 +3,7 @@ version: '3.1'
 services:
 
   ghost:
-    container_name: ghost
+    container_name: ghost_blog
     image: ghost:${GHOST_DOCKER_VERSION:-latest}
     restart: always
     ports:
@@ -29,16 +29,16 @@ services:
       url: "${PROTOCOL:-https}://${SITE_URL:-localhost}:${PORT:-8080}"
       NODE_ENV: ${NODE_ENV:-development} # change me for production
 
-    links:
-      - mysql
+    networks:
+      - ghost
 
 
-  mysql:
-    container_name: ghost_db_mysql
+  ghost_db:
+    container_name: ghost_db
     image: mysql:${MYSQL_DOCKER_VERSION:-latest}
     restart: always
     volumes:
-      - ~/data/db:/var/lib/mysql
+      - ./data/db:/var/lib/mysql
 
     ports:
       - ${DB_PORT:-3306}:3306
@@ -48,3 +48,10 @@ services:
       MYSQL_DATABASE: "${DB_DATABASE}"
       MYSQL_USER: "${DB_USER}"
       MYSQL_PASSWORD:  "${DB_PASSWORD}"
+      
+    networks:
+      - ghost
+
+networks:
+  ghost:
+    name: ghost_blog
