@@ -8,7 +8,18 @@ services:
     restart: always
     ports:
       - ${PORT:-8080}:2368
+    volumes:
+      # Ghost configs at /configs/ghost/config.(production|development).json
+      - ./configs/ghost/config.production.json:/var/lib/ghost/config.production.json:z 
+      - ./configs/ghost/config.development.json:/var/lib/ghost/config.development.json:z 
+      
+      # Ghost content directory stored to /data/content
+      - ./data/content:/var/lib/ghost/content:z
+
     environment:
+      # These double-underscore syntax environment variables are used by Ghost to set nested
+      # values for the configuration options.
+      # eg: database__connection__host: "foo" => {database: connection: host: "foo"}
       # see https://ghost.org/docs/config/#configuration-options
       database__client: mysql
       database__connection__host: ${DB_HOST:-localhost}
