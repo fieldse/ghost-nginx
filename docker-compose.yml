@@ -3,11 +3,16 @@ version: '3.1'
 services:
 
   ghost:
-    container_name: ghost_blog
     image: ghost:${GHOST_DOCKER_VERSION:-latest}
-    restart: always
+    container_name: ghost_blog
+    hostname: ghost-blog
+    depends_on:
+      - db
     ports:
-      - ${PORT:-8080}:2368
+      - ${GHOST_PORT:-8080}:2368
+    expose:
+      - ${GHOST_PORT:-8080}
+
     volumes:
       # Ghost configs at /configs/ghost/config.(production|development).json
       - ./configs/ghost/config.production.json:/var/lib/ghost/config.production.json:z 
@@ -15,6 +20,7 @@ services:
       
       # Ghost content directory stored to /data/content
       - ./data/content:/var/lib/ghost/content:z
+    restart: always
 
     environment:
       # These double-underscore syntax environment variables are used by Ghost to set nested
@@ -33,7 +39,7 @@ services:
       - ghost
 
 
-  ghost_db:
+  db:
     container_name: ghost_db
     image: mysql:${MYSQL_DOCKER_VERSION:-latest}
     restart: always
