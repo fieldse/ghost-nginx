@@ -10,8 +10,7 @@ services:
       - db
     ports:
       - ${GHOST_PORT:-8080}:2368
-    expose:
-      - ${GHOST_PORT:-8080}
+      - 2368:2368
 
     volumes:
       # Ghost configs at /configs/ghost/config.(production|development).json
@@ -28,10 +27,10 @@ services:
       # eg: database__connection__host: "foo" => {database: connection: host: "foo"}
       # see https://ghost.org/docs/config/#configuration-options
       database__client: mysql
-      database__connection__host: ${DB_HOST:-localhost}
-      database__connection__user: ${DB_USER}
-      database__connection__password: ${DB_PASSWORD}
-      database__connection__database: ${DB_DATABASE}
+      database__connection__host: db
+      database__connection__user: ${MYSQL_USER}
+      database__connection__password: ${MYSQL_PASSWORD}
+      database__connection__database: ${MYSQL_DATABASE}
       url: "${PROTOCOL:-https}://${SITE_URL:-localhost}:${PORT:-8080}"
       NODE_ENV: ${NODE_ENV:-development} # change me for production
 
@@ -47,13 +46,13 @@ services:
       - ./data/db:/var/lib/mysql
 
     ports:
-      - ${DB_PORT:-3306}:3306
+      - ${MYSQL_PORT:-3306}:3306
 
     environment:
-      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
-      MYSQL_DATABASE: "${DB_DATABASE}"
-      MYSQL_USER: "${DB_USER}"
-      MYSQL_PASSWORD:  "${DB_PASSWORD}"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASSWORD:  "${MYSQL_PASSWORD}"
       
     networks:
       - ghost
