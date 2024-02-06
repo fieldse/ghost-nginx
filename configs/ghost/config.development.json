@@ -1,4 +1,16 @@
 {
+  "url": "http://localhost:8080",
+  "server": {
+    "port": 2368,
+    "host": "172.28.0.4"
+  },
+  "database": {
+      "client": "sqlite3",
+      "connection": {
+          "filename": "content/data/ghost-dev.db"
+      },
+      "debug": false
+  },
   "paths": {
       "contentPath": "content/"
   },

@@ -15,11 +15,31 @@ services:
     restart: always
 
     environment:
-      NODE_ENV: development # change me for production
+      NODE_ENV: ${NODE_ENV}
+      url: "${PROTOCOL}://${SITE_URL}:${GHOST_PORT}"
 
     networks:
       - ghost
-      - default
+
+
+  db:
+    container_name: ghost_db
+    image: mysql:${MYSQL_DOCKER_VERSION:-latest}
+    restart: always
+    volumes:
+      - ./data/db:/var/lib/mysql
+
+    ports:
+      - ${MYSQL_PORT:-3306}:3306
+
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASSWORD:  "${MYSQL_PASSWORD}"
+      
+    networks:
+      - ghost
 
 networks:
   ghost:
