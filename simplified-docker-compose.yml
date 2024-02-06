@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+
+  ghost:
+    image: ghost:5
+    container_name: ghost_blog
+    hostname: ghost-blog
+    ports:
+      - ${GHOST_PORT:-8080}:2368
+
+    volumes:
+      - ./data/content:/var/lib/ghost/content:z
+      
+    restart: always
+
+    environment:
+      NODE_ENV: development # change me for production
+
+    networks:
+      - ghost
+      - default
+
+networks:
+  ghost:
+    name: ghost_blog_network
