@@ -1,0 +1,3 @@
+[submodule "data/content/themes/edge"]
+	path = data/content/themes/edge
+	url = git@github.com:TryGhost/Edge.git
