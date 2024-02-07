@@ -13,6 +13,8 @@ services:
       - ./data/content:/var/lib/ghost/content:z
       
     restart: always
+    depends_on:
+      - db
 
     environment:
       NODE_ENV: ${NODE_ENV}
@@ -32,7 +34,7 @@ services:
     image: mysql:${MYSQL_DOCKER_VERSION:-latest}
     restart: always
     volumes:
-      - ./data/db:/var/lib/mysql
+      - ghost_data:/var/lib/mysql
 
     ports:
       - ${MYSQL_PORT:-3306}:3306
@@ -49,3 +51,6 @@ services:
 networks:
   ghost:
     name: ghost_blog_network
+
+volumes:
+  ghost_data:
