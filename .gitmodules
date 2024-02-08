@@ -1,3 +1,6 @@
 [submodule "data/content/themes/edge"]
 	path = data/content/themes/edge
 	url = git@github.com:TryGhost/Edge.git
+[submodule "data/content/adapters/storage/ghost-storage-back-blaze"]
+	path = data/content/adapters/storage/ghost-storage-back-blaze
+	url = git@gitlab.com:RedSerenity/Ghost/Adapters/ghost-storage-back-blaze.git
