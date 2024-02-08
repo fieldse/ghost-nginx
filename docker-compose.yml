@@ -25,6 +25,11 @@ services:
       database__connection__password: ${MYSQL_PASSWORD}
       database__connection__database: ${MYSQL_DATABASE}
 
+      # Backblaze settings
+      storage__active: "ghost-storage-back-blaze"
+      storage__ghost-storage-back-blaze__keyId: ${BACKBLAZE_KEY_ID}
+      storage__ghost-storage-back-blaze__secretKey: ${BACKBLAZE_SECRET}
+
     networks:
       - ghost
 
