@@ -2,12 +2,41 @@ version: '3.8'
 
 services:
 
+# ===================================================== # 
+#                       Nginx                           #
+# ===================================================== # 
+# See: https://github.com/gabrielberthier/docker-compose-ghost-setup
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    hostname: ghost-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/configs/ghost.template:/etc/nginx/conf.d/ghost.template
+      - ./configs/nginx:/etc/nginx/conf.d/
+      # - ./data/certbot/conf:/etc/letsencrypt
+      # - ./data/certbot/www:/var/www/certbot
+    depends_on:
+      # - certbot
+      - ghost
+    restart: always
+    environment:
+      - APP_DOMAIN=${APP_DOMAIN}
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
+
+
+# ===================================================== # 
+#                       Ghost                           #
+# ===================================================== # 
   ghost:
     image: ghost:${GHOST_DOCKER_VERSION}
     container_name: ghost_blog
     hostname: ghost-blog
     ports:
-      - ${GHOST_PORT:-8080}:2368
+      - 2368:2368
 
     volumes:
       - ./data/content:/var/lib/ghost/content:z
@@ -18,7 +47,7 @@ services:
 
     environment:
       NODE_ENV: ${NODE_ENV}
-      url: "${PROTOCOL}://${SITE_URL}:${GHOST_PORT}"
+      url: "${PROTOCOL}://${APP_DOMAIN}:${GHOST_PORT}"
       database__client: mysql
       database__connection__host: db  # this points to the db service container
       database__connection__user: ${MYSQL_USER}
@@ -46,7 +75,9 @@ services:
     networks:
       - ghost
 
-
+# ===================================================== # 
+#                      MySQL                            #
+# ===================================================== # 
   db:
     container_name: ghost_db
     image: mysql:${MYSQL_DOCKER_VERSION:-latest}
@@ -65,6 +96,17 @@ services:
       
     networks:
       - ghost
+
+# ===================================================== # 
+#                      Certbot                          #
+# ===================================================== # 
+  # certbot:
+  #   image: certbot/certbot
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./data/certbot/conf:/etc/letsencrypt
+  #     - ./data/certbot/www:/var/www/certbot
+  #   entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 networks:
   ghost:
