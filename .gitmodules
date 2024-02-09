@@ -4,3 +4,6 @@
 [submodule "data/content/adapters/storage/ghost-storage-back-blaze"]
 	path = data/content/adapters/storage/ghost-storage-back-blaze
 	url = git@gitlab.com:RedSerenity/Ghost/Adapters/ghost-storage-back-blaze.git
+[submodule "data/content/adapters/storage/ghost-cloudflare-r2"]
+	path = data/content/adapters/storage/ghost-cloudflare-r2
+	url = git@github.com:egeldenhuys/ghost-cloudflare-r2.git
