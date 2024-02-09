@@ -25,6 +25,24 @@ services:
       database__connection__password: ${MYSQL_PASSWORD}
       database__connection__database: ${MYSQL_DATABASE}
 
+      # Backblaze settings
+      # storage__active: "ghost-storage-back-blaze"
+      # storage__ghost-storage-back-blaze__keyId: ${BACKBLAZE_KEY_ID}
+      # storage__ghost-storage-back-blaze__secretKey: ${BACKBLAZE_SECRET}
+
+      # R2 settings
+      storage__active: ghost-cloudflare-r2
+      storage__media__adapter: ghost-cloudflare-r2
+      storage__media__storage_type_media: true
+      storage__files__adapter: ghost-cloudflare-r2
+      storage__files__storage_type_files: true
+
+      GHOST_STORAGE_ADAPTER_R2_ENDPOINT: ${GHOST_STORAGE_ADAPTER_R2_ENDPOINT}
+      GHOST_STORAGE_ADAPTER_R2_ACCESS_KEY_ID: ${GHOST_STORAGE_ADAPTER_R2_ACCESS_KEY_ID}
+      GHOST_STORAGE_ADAPTER_R2_SECRET_ACCESS_KEY: ${GHOST_STORAGE_ADAPTER_R2_SECRET_ACCESS_KEY}
+      GHOST_STORAGE_ADAPTER_R2_BUCKET: ${GHOST_STORAGE_ADAPTER_R2_BUCKET}
+      GHOST_STORAGE_ADAPTER_R2_DOMAIN: ${GHOST_STORAGE_ADAPTER_R2_DOMAIN}
+
     networks:
       - ghost
 
