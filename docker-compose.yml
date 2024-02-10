@@ -47,20 +47,23 @@ services:
 
     environment:
       NODE_ENV: ${NODE_ENV}
-      url: "${PROTOCOL}://${APP_DOMAIN}:${GHOST_PORT}"
+      url: "${PROTOCOL}://${APP_DOMAIN}:2368"
       database__client: mysql
       database__connection__host: db  # this points to the db service container
       database__connection__user: ${MYSQL_USER}
       database__connection__password: ${MYSQL_PASSWORD}
       database__connection__database: ${MYSQL_DATABASE}
 
+
+      # S3-compatible storage backend
+      # eg: 'ghost-storage-back-blaze' or 'ghost-cloudflare-r2'
+      storage__active: ${STORAGE_BACKEND}
+
       # Backblaze settings
-      # storage__active: "ghost-storage-back-blaze"
-      # storage__ghost-storage-back-blaze__keyId: ${BACKBLAZE_KEY_ID}
-      # storage__ghost-storage-back-blaze__secretKey: ${BACKBLAZE_SECRET}
+      storage__ghost-storage-back-blaze__keyId: ${BACKBLAZE_KEY_ID}
+      storage__ghost-storage-back-blaze__secretKey: ${BACKBLAZE_SECRET}
 
       # R2 settings
-      storage__active: ghost-cloudflare-r2
       storage__media__adapter: ghost-cloudflare-r2
       storage__media__storage_type_media: true
       storage__files__adapter: ghost-cloudflare-r2
