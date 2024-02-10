@@ -14,19 +14,43 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/configs/ghost.template:/etc/nginx/conf.d/ghost.template
-      - ./configs/nginx:/etc/nginx/conf.d/
-      # - ./data/certbot/conf:/etc/letsencrypt
-      # - ./data/certbot/www:/var/www/certbot
+      - ./configs/nginx:/etc/nginx/conf.d
+
+      # Shared certbot confs directory
+      - letsencrypt_conf:/etc/letsencrypt
+      
+      # Shared certbot data directory
+      - letsencrypt_www_data:/var/www/certbot
+
     depends_on:
-      # - certbot
+      - certbot
       - ghost
     restart: always
     environment:
       - APP_DOMAIN=${APP_DOMAIN}
-    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
+    networks:
+      - ghost
 
 
+# ===================================================== # 
+#                      Certbot                          #
+# ===================================================== # 
+  certbot:
+    image: certbot/certbot
+    restart: unless-stopped
+    volumes:
+     # Certbot configs directory
+      - letsencrypt_conf:/etc/letsencrypt
+
+      # Not sure what is stored in this directory
+      - letsencrypt_www_data:/var/www/certbot
+
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+    networks:
+      ghost:
+        name: ghost_blog_network
 
 # ===================================================== # 
 #                       Ghost                           #
@@ -100,20 +124,9 @@ services:
     networks:
       - ghost
 
-# ===================================================== # 
-#                      Certbot                          #
-# ===================================================== # 
-  # certbot:
-  #   image: certbot/certbot
-  #   restart: unless-stopped
-  #   volumes:
-  #     - ./data/certbot/conf:/etc/letsencrypt
-  #     - ./data/certbot/www:/var/www/certbot
-  #   entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-
-networks:
-  ghost:
-    name: ghost_blog_network
 
 volumes:
   ghost_data:
+  letsencrypt_conf:
+    # TODO: Set this to store to a local directory
+  letsencrypt_www_data:
