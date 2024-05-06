@@ -84,8 +84,11 @@ services:
       VIRTUAL_HOST: "${APP_DOMAIN},www.${APP_DOMAIN}" # used by nginx-proxy
       VIRTUAL_PORT: ${GHOST_PORT}
 
+      # Enabling these environment variables will cause the letsencrypt companion to notice the container 
+      # and try to generate SSL certs
       LETSENCRYPT_HOST: "${APP_DOMAIN},www.${APP_DOMAIN}"
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+      LETSENCRYPT_TEST: ${LETSENCRYPT_IS_TEST_DOMAIN} # prevents trying to generate certs for development sites
 
       # Database settings
       database__client: mysql
