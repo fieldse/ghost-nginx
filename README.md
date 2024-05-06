@@ -50,6 +50,13 @@ If you want to serve this to the public web, you'll need to open the port on you
 
 - _TODO_
 
+
+## Credits
+
+Nginx/Certbot Docker configuration
+- Gabriel Berthier - https://github.com/gabrielberthier/docker-compose-ghost-setup
+
+
 ## License
 
 - MIT License

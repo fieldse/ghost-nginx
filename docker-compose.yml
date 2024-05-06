@@ -2,15 +2,76 @@ version: '3.8'
 
 services:
 
+# ========================================== # 
+#              Nginx-proxy                   #
+# ========================================== # 
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx_proxy_ghost
+    volumes: 
+
+      # Read-only SSL certs
+      - certs:/etc/nginx/certs:ro
+      
+      # Nginx virtual hosts and HTML dirs
+      # These are used by SSL proxy companion to write challenge files
+      - nginx_vhosts:/etc/nginx/vhost.d 
+      - nginx_html:/usr/share/nginx/html
+
+
+      # Docker socket, required for discovering running containers
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - ghost
+
+    labels:
+      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: ""
+    restart: always
+
+
+# ========================================== # 
+#             Letsencrypt                    #
+# ========================================== # 
+# From jwilder's nginx-proxy companion
+# This generates SSL certs when a new container with the VIRTUAL_HOST label is discovered.
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: nginx_proxy_letsencrypt
+    volumes:
+      - certs:/etc/nginx/certs
+
+      # Nginx virtual hosts configs
+      - nginx_vhosts:/etc/nginx/vhost.d
+
+      # Nginx HTML dir
+      - nginx_html:/usr/share/nginx/html
+
+      # Docker socket, required for container discovery
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+    restart: unless-stopped
+    depends_on:
+      - nginx-proxy
+
+    networks:
+      ghost:
+
+# ========================================== # 
+#                 Ghost                      #
+# ========================================== # 
   ghost:
     image: ghost:${GHOST_DOCKER_VERSION}
     container_name: ghost_blog
     hostname: ghost-blog
-    ports:
-      - ${GHOST_PORT:-8080}:2368
+    expose:
+      - 2368:2368
 
     volumes:
-      - ./data/content:/var/lib/ghost/content:z
+      - ./data/ghost/content:/var/lib/ghost/content:z
       
     restart: always
     depends_on:
@@ -18,35 +79,51 @@ services:
 
     environment:
       NODE_ENV: ${NODE_ENV}
-      url: "${PROTOCOL}://${SITE_URL}:${GHOST_PORT}"
+      url: "${PROTOCOL}://${APP_DOMAIN}:${GHOST_PORT}" # used by Ghost for site config
+      
+      VIRTUAL_HOST: "${APP_DOMAIN},www.${APP_DOMAIN}" # used by nginx-proxy
+      VIRTUAL_PORT: ${GHOST_PORT}
+
+      # Enabling these environment variables will cause the letsencrypt companion to notice the container 
+      # and try to generate SSL certs
+      LETSENCRYPT_HOST: "${APP_DOMAIN},www.${APP_DOMAIN}"
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+      LETSENCRYPT_TEST: ${LETSENCRYPT_IS_TEST_DOMAIN} # prevents trying to generate certs for development sites
+
+      # Database settings
       database__client: mysql
       database__connection__host: db  # this points to the db service container
       database__connection__user: ${MYSQL_USER}
       database__connection__password: ${MYSQL_PASSWORD}
       database__connection__database: ${MYSQL_DATABASE}
 
-      # Backblaze settings
-      # storage__active: "ghost-storage-back-blaze"
-      # storage__ghost-storage-back-blaze__keyId: ${BACKBLAZE_KEY_ID}
-      # storage__ghost-storage-back-blaze__secretKey: ${BACKBLAZE_SECRET}
 
-      # R2 settings
-      storage__active: ghost-cloudflare-r2
-      storage__media__adapter: ghost-cloudflare-r2
-      storage__media__storage_type_media: true
-      storage__files__adapter: ghost-cloudflare-r2
-      storage__files__storage_type_files: true
+      # Backblaze env settings
+      storage__ghost-storage-back-blaze__keyId: ${BACKBLAZE_KEY_ID}
+      storage__ghost-storage-back-blaze__secretKey: ${BACKBLAZE_SECRET}
 
+
+      # R2 env settings
       GHOST_STORAGE_ADAPTER_R2_ENDPOINT: ${GHOST_STORAGE_ADAPTER_R2_ENDPOINT}
       GHOST_STORAGE_ADAPTER_R2_ACCESS_KEY_ID: ${GHOST_STORAGE_ADAPTER_R2_ACCESS_KEY_ID}
       GHOST_STORAGE_ADAPTER_R2_SECRET_ACCESS_KEY: ${GHOST_STORAGE_ADAPTER_R2_SECRET_ACCESS_KEY}
       GHOST_STORAGE_ADAPTER_R2_BUCKET: ${GHOST_STORAGE_ADAPTER_R2_BUCKET}
       GHOST_STORAGE_ADAPTER_R2_DOMAIN: ${GHOST_STORAGE_ADAPTER_R2_DOMAIN}
 
+      # S3-compatible storage backend
+      # eg: 'ghost-storage-back-blaze' or 'ghost-cloudflare-r2'
+      storage__active: ${STORAGE_BACKEND}
+      storage__media__adapter: ${STORAGE_BACKEND}
+      storage__files__adapter: ${STORAGE_BACKEND}
+      storage__media__storage_type_media: true
+      storage__files__storage_type_files: true
+
     networks:
       - ghost
 
-
+# ========================================== # 
+#                  MySQL                     #
+# ========================================== # 
   db:
     container_name: ghost_db
     image: mysql:${MYSQL_DOCKER_VERSION:-latest}
@@ -66,9 +143,18 @@ services:
     networks:
       - ghost
 
+
+# ========================================== # 
+#       Docker volumes & networks            #
+# ========================================== # 
+volumes:
+  ghost_data:           # MySQL data 
+  certs:                # Letsencrypt certs
+
+  # Nginx vhosts and HTML directories -- used by letsencrypt for challenge files
+  nginx_vhosts:
+  nginx_html:
+
 networks:
   ghost:
-    name: ghost_blog_network
-
-volumes:
-  ghost_data:
+    name: ghost_nginx_network
