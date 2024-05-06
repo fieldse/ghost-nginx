@@ -13,11 +13,17 @@ services:
       # Read-only SSL certs
       - certs:/etc/nginx/certs:ro
       
-      # Nginx virtual hosts configs
-      - nginx_vhosts:/etc/nginx/vhost.d
+      # Nginx virtual hosts and HTML dirs
+      # Can either store locally or in a data volume
 
-      # Nginx HTML dir
-      - nginx_html:/usr/share/nginx/html
+      # -- store locally to /data/nginx
+      - ./data/nginx/vhosts:/etc/nginx/vhost.d
+      - ./data/nginx/html:/usr/share/nginx/html
+      
+      # -- uncomment these to use a storage volume instead
+      # - nginx_vhosts:/etc/nginx/vhost.d 
+      # - nginx_html:/usr/share/nginx/html
+
 
       # Docker socket, required for discovering running containers
       - /var/run/docker.sock:/tmp/docker.sock:ro
