@@ -7,6 +7,7 @@ services:
 # ========================================== # 
   nginx-proxy:
     image: jwilder/nginx-proxy
+    container_name: nginx_proxy_ghost
     volumes: 
 
       # Read-only SSL certs
@@ -29,34 +30,35 @@ services:
 
     labels:
       com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: ""
-    restart: unless-stopped
+    restart: always
 
 
 # ========================================== # 
 #             Letsencrypt                    #
 # ========================================== # 
 # From jwilder's nginx-proxy companion
-# This generates SSL certs when a new container with the ?????? label is discovered.
-  letsencrypt:
-    image: jrcs/letsencrypt-nginx-proxy-companion
-    volumes:
-      - certs:/etc/nginx/certs
+# This generates SSL certs when a new container with the VIRTUAL_HOST label is discovered.
+  # letsencrypt:
+  #   image: jrcs/letsencrypt-nginx-proxy-companion
+  #   container_name: nginx_proxy_letsencrypt
+  #   volumes:
+  #     - certs:/etc/nginx/certs
 
-      # Nginx virtual hosts configs
-      - nginx_vhosts:/etc/nginx/vhost.d
+  #     # Nginx virtual hosts configs
+  #     - nginx_vhosts:/etc/nginx/vhost.d
 
-      # Nginx HTML dir
-      - nginx_html:/usr/share/nginx/html
+  #     # Nginx HTML dir
+  #     - nginx_html:/usr/share/nginx/html
 
-      # Docker socket, required for container discovery
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     # Docker socket, required for container discovery
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
 
-    restart: unless-stopped
-    depends_on:
-      - nginx-proxy
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - nginx-proxy
 
-    networks:
-      ghost:
+  #   networks:
+  #     ghost:
 
 # ========================================== # 
 #                 Ghost                      #
@@ -65,11 +67,11 @@ services:
     image: ghost:${GHOST_DOCKER_VERSION}
     container_name: ghost_blog
     hostname: ghost-blog
-    ports:
+    expose:
       - 2368:2368
 
     volumes:
-      - ./data/content:/var/lib/ghost/content:z
+      - ./data/ghost/content:/var/lib/ghost/content:z
       
     restart: always
     depends_on:
@@ -93,25 +95,25 @@ services:
       database__connection__database: ${MYSQL_DATABASE}
 
 
-      # S3-compatible storage backend
-      # eg: 'ghost-storage-back-blaze' or 'ghost-cloudflare-r2'
-      storage__active: ${STORAGE_BACKEND}
-
-      # Backblaze settings
+      # Backblaze env settings
       storage__ghost-storage-back-blaze__keyId: ${BACKBLAZE_KEY_ID}
       storage__ghost-storage-back-blaze__secretKey: ${BACKBLAZE_SECRET}
 
-      # R2 settings
-      storage__media__adapter: ghost-cloudflare-r2
-      storage__media__storage_type_media: true
-      storage__files__adapter: ghost-cloudflare-r2
-      storage__files__storage_type_files: true
 
+      # R2 env settings
       GHOST_STORAGE_ADAPTER_R2_ENDPOINT: ${GHOST_STORAGE_ADAPTER_R2_ENDPOINT}
       GHOST_STORAGE_ADAPTER_R2_ACCESS_KEY_ID: ${GHOST_STORAGE_ADAPTER_R2_ACCESS_KEY_ID}
       GHOST_STORAGE_ADAPTER_R2_SECRET_ACCESS_KEY: ${GHOST_STORAGE_ADAPTER_R2_SECRET_ACCESS_KEY}
       GHOST_STORAGE_ADAPTER_R2_BUCKET: ${GHOST_STORAGE_ADAPTER_R2_BUCKET}
       GHOST_STORAGE_ADAPTER_R2_DOMAIN: ${GHOST_STORAGE_ADAPTER_R2_DOMAIN}
+
+      # S3-compatible storage backend
+      # eg: 'ghost-storage-back-blaze' or 'ghost-cloudflare-r2'
+      storage__active: ${STORAGE_BACKEND}
+      storage__media__adapter: ${STORAGE_BACKEND}
+      storage__files__adapter: ${STORAGE_BACKEND}
+      storage__media__storage_type_media: true
+      storage__files__storage_type_files: true
 
     networks:
       - ghost
