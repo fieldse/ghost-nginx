@@ -14,15 +14,9 @@ services:
       - certs:/etc/nginx/certs:ro
       
       # Nginx virtual hosts and HTML dirs
-      # Can either store locally or in a data volume
-
-      # -- store locally to /data/nginx
-      - ./data/nginx/vhosts:/etc/nginx/vhost.d
-      - ./data/nginx/html:/usr/share/nginx/html
-      
-      # -- uncomment these to use a storage volume instead
-      # - nginx_vhosts:/etc/nginx/vhost.d 
-      # - nginx_html:/usr/share/nginx/html
+      # These are used by SSL proxy companion to write challenge files
+      - nginx_vhosts:/etc/nginx/vhost.d 
+      - nginx_html:/usr/share/nginx/html
 
 
       # Docker socket, required for discovering running containers
@@ -44,27 +38,27 @@ services:
 # ========================================== # 
 # From jwilder's nginx-proxy companion
 # This generates SSL certs when a new container with the VIRTUAL_HOST label is discovered.
-  # letsencrypt:
-  #   image: jrcs/letsencrypt-nginx-proxy-companion
-  #   container_name: nginx_proxy_letsencrypt
-  #   volumes:
-  #     - certs:/etc/nginx/certs
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: nginx_proxy_letsencrypt
+    volumes:
+      - certs:/etc/nginx/certs
 
-  #     # Nginx virtual hosts configs
-  #     - nginx_vhosts:/etc/nginx/vhost.d
+      # Nginx virtual hosts configs
+      - nginx_vhosts:/etc/nginx/vhost.d
 
-  #     # Nginx HTML dir
-  #     - nginx_html:/usr/share/nginx/html
+      # Nginx HTML dir
+      - nginx_html:/usr/share/nginx/html
 
-  #     # Docker socket, required for container discovery
-  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Docker socket, required for container discovery
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
-  #   restart: unless-stopped
-  #   depends_on:
-  #     - nginx-proxy
+    restart: unless-stopped
+    depends_on:
+      - nginx-proxy
 
-  #   networks:
-  #     ghost:
+    networks:
+      ghost:
 
 # ========================================== # 
 #                 Ghost                      #
@@ -154,14 +148,9 @@ volumes:
   ghost_data:           # MySQL data 
   certs:                # Letsencrypt certs
 
-  # Nginx vhosts directory -- mounted at /etc/nginx/vhost.d
+  # Nginx vhosts and HTML directories -- used by letsencrypt for challenge files
   nginx_vhosts:
-
-  # Nginx HTML directory -- mounted at /usr/share/nginx/html
   nginx_html:
-
-  letsencrypt_conf:     # TODO: Set this to store to a local directory
-  letsencrypt_www_data:
 
 networks:
   ghost:
